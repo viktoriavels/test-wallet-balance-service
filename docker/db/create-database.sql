@@ -1,0 +1,1 @@
+create database test_wallet_balance_service_db;

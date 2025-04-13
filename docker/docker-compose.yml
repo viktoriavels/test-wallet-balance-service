@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  test-wallet-balance-service:
+    image: test-wallet-balance-service:1.0.0
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    ports:
+      - "8181:8080"
+    depends_on:
+      - db
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/test_wallet_balance_service_db
+      - SPRING_DATASOURCE_USERNAME=test_wallet_balance_service_usr
+      - SPRING_DATASOURCE_PASSWORD=test_wallet_balance_service_pass
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=20
+      - SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=30000
+      - SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=180000
+      - SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=5000
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_USER=test_wallet_balance_service_usr
+      - SPRING_LIQUIBASE_PASSWORD=test_wallet_balance_service_pass
+      - SPRING_PROFILES_ACTIVE=balance-grouped
+      - APP_GROUPED_THREADS_COUNT=20
+
+  db:
+    image: postgres:14.7-alpine
+    environment:
+      POSTGRES_USER: test_wallet_balance_service_usr
+      POSTGRES_PASSWORD: test_wallet_balance_service_pass
+    ports:
+      - "15432:5432"
+    volumes:
+      - ./db/create-database.sql:/docker-entrypoint-initdb.d/create-database.sql
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-data:
